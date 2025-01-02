@@ -1,0 +1,67 @@
+plugins {
+	id 'java'
+	id 'war'
+	id 'org.springframework.boot' version '3.4.2-SNAPSHOT'
+	id 'io.spring.dependency-management' version '1.1.7'
+	id "io.freefair.lombok" version "8.4"
+	id 'org.hidetake.swagger.generator' version '2.19.2'
+}
+
+group = 'com.shouteria'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+repositories {
+	mavenCentral()
+	maven { url 'https://repo.spring.io/snapshot' }
+}
+
+processResources {
+	dependsOn(generateSwaggerCode)
+}
+
+swaggerSources {
+	shouteria {
+		inputFile = file("${rootDir}/src/main/resources/api/shouteria.yaml")
+		code {
+			language = 'spring'
+
+			configFile = file("${rootDir}/src/main/resources/api/config.json")
+
+			components = [models: true, apis: true, supportingFiles: 'ApiUtil.java']
+			dependsOn validation //first validate the yaml
+		}
+	}
+}
+
+compileJava.dependsOn swaggerSources.shouteria.code
+sourceSets.main.java.srcDir "${swaggerSources.shouteria.code.outputDir}/src/main/java"
+sourceSets.main.resources.srcDir "${swaggerSources.shouteria.code.outputDir}/src/main/resources"
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	implementation "org.seleniumhq.selenium:selenium-java:4.27.0"
+
+	implementation "org.jsoup:jsoup:1.18.3"
+
+	implementation 'org.springframework.boot:spring-boot-starter-hateoas'
+
+	swaggerCodegen 'org.openapitools:openapi-generator-cli:7.3.0'
+	implementation 'io.swagger.core.v3:swagger-annotations:2.2.20'
+
+	implementation group: 'org.apache.pdfbox', name: 'pdfbox', version: '3.0.3'
+	implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.6.0'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
