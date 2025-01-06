@@ -27,7 +27,9 @@ public class ScrapeService {
   public List<String> scrape(String uri) {
     ChromeOptions options = new ChromeOptions();
     // options.addArguments("--headless");
-    options.addArguments("--headless=new");
+    // options.addArguments("--headless=new");
+    options.addArguments("--disable-dev-shm-usage");
+    options.addArguments("--no-sandbox");
 
     WebDriver driver = new ChromeDriver(options);
     driver.get(uri);
