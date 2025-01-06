@@ -26,7 +26,8 @@ public class ScrapeService {
 
   public List<String> scrape(String uri) {
     ChromeOptions options = new ChromeOptions();
-    options.addArguments("--headless");
+    // options.addArguments("--headless");
+    options.addArguments("--headless=new");
 
     WebDriver driver = new ChromeDriver(options);
     driver.get(uri);
